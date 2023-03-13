@@ -12,7 +12,7 @@
 <br/>
 <br/>
 
-## Downloads
+## Downloads (Oficial Server, Hosted and Maintained by [NeuroRehabLab](https://neurorehablab.arditi.pt))
 | Operative System | Download Link |
 |--|--|
 | Windows 7 | [Download](https://rehstore.arditi.pt/app_update/version_5/win32-x64/rehstore-setup-latest.exe) |
