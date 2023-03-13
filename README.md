@@ -8,7 +8,7 @@
 
 <br/>
 
-:warning: **This repository is under construction**: To use the lastest Reh@Store version, download it at: https://rehstore.arditi.pt
+:warning: **This repository is under construction**: To use the lastest Reh@Store version please visit https://rehstore.arditi.pt
 <br/>
 <br/>
 
