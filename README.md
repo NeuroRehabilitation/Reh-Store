@@ -12,15 +12,10 @@
 <br/>
 <br/>
 
-## Client Application (Hosted and Maintained by [NeuroRehabLab](https://neurorehablab.arditi.pt))
-| Operative System | Download Link |
-|--|--|
-| Windows 7 | [Download](https://rehstore.arditi.pt/app_update/version_5/win32-x64/rehstore-setup-latest.exe) |
-| Windows 8 | [Download](https://rehstore.arditi.pt/app_update/version_5/win32-x64/rehstore-setup-latest.exe) |
-| Windows 10 | [Download](https://rehstore.arditi.pt/app_update/version_5/win32-x64/rehstore-setup-latest.exe) |
-| Windows 11 | [Download](https://rehstore.arditi.pt/app_update/version_5/win32-x64/rehstore-setup-latest.exe) |
 
-<br/>
+## Oficial Reh@Store client and server
+The oficial Reh@Store server is hosted at [rehstore.arditi.pt](https://rehstore.arditi.pt), and maintained by the  [NeuroRehabLab](https://neurorehablab.arditi.pt).
+
 <br/>
 
 ## Funding and Hosting
