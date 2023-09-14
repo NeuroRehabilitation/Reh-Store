@@ -20,9 +20,6 @@
 | Windows 10 | [Download](https://rehstore.arditi.pt/app_update/version_5/win32-x64/rehstore-setup-latest.exe) |
 | Windows 11 | [Download](https://rehstore.arditi.pt/app_update/version_5/win32-x64/rehstore-setup-latest.exe) |
 
-## Changelog
-__[View Changelog](https://github.com/Zlynt/RehStoreClientApp/releases)__
-
 <br/>
 <br/>
 
