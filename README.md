@@ -23,6 +23,7 @@ The client application source code is located on the branch ["client"](https://g
 The server source code is located on the branch ["server"](https://github.com/Zlynt/Reh-Store/tree/server).
 
 ## Oficial Reh@Store client and server
+
 The oficial Reh@Store server is hosted at [rehstore.arditi.pt](https://rehstore.arditi.pt), and maintained by the  [NeuroRehabLab](https://neurorehablab.arditi.pt).
 
 <br/>
