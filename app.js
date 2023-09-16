@@ -86,12 +86,6 @@ fs.readdirSync(chain_certificates_path).forEach(chain_cert => {
 
 const https_web_server = https.createServer(certificates, app);
 
-https_web_server.addContext('rehstore.arditi.pt', {
-    key: fs.readFileSync('/etc/letsencrypt/live/rehstore.arditi.pt/privkey.pem', 'utf-8'),
-    cert: fs.readFileSync('/etc/letsencrypt/live/rehstore.arditi.pt/cert.pem', 'utf-8'),
-    requestCert: true,
-    rejectUnauthorized: false
-});
 /* //Custom protector disable - cannot handle too much trafic
 //Ban IP's from bots
 https_web_server.on('connection', (sock) => {

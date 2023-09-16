@@ -5,7 +5,7 @@ The Reh@Store is a software distribution service for research projects maintaine
 
 ## How to setup
 
-First install the latest secure Node.js version (in 03/05/2021 it is Node.js version 16)
+First install the latest LTS Node.js version
 
 Then create a systemd service to run the Reh@Store 24/7. This service must execute the script "start.sh" located in the root of this directory.
 
