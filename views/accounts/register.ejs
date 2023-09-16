@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= siteName %>
+    </title>
+
+    <%- include('../dependencies/bootstrap') %>
+</head>
+
+<body>
+    <%- include('../partials/navbar') %>
+
+        <style>
+            header {
+                padding: 156px 0 100px;
+            }
+
+            section {
+                padding: 150px 0;
+            }
+
+            body {
+                background-color: #1abc9c !important;
+            }
+        </style>
+        <section>
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-8 mx-auto">
+                        <div class="card">
+                            <div class="card-body">
+                                <h2 class="card-title text-center">Register a new account</h2>
+                            </div>
+                            <div class="card-body">
+                                <form class="row g-3 needs-validation" novalidate>
+                                    <div class="form-floating col-md-4 has-validation">
+                                        <input type="text" class="form-control" id="inputUsername"
+                                            aria-describedby="inputUsernameHelp" placeholder="Username" required>
+                                        <label for="inputUsername">Username</label>
+                                        <div class="invalid-feedback">
+                                            Please choose a username.
+                                        </div>
+                                        <small id="inputUsernameHelp" class="form-text text-muted">
+                                            Only letters and numbers are allowed in this field.
+                                        </small>
+                                    </div>
+
+                                    <div class="form-floating col-md-4 has-validation">
+                                        <input type="text" class="form-control" id="inputFirstName"
+                                            aria-describedby="inputFirstNameHelp" placeholder="First Name" required>
+                                        <label for="inputFirstName">First Name</label>
+                                        <div class="invalid-feedback">
+                                            This field cannot be blank
+                                        </div>
+                                        <small id="inputFirstNameHelp" class="form-text text-muted">
+                                            Only letters are allowed in this field.
+                                        </small>
+                                    </div>
+
+                                    <div class="form-floating col-md-4 has-validation">
+                                        <input type="text" class="form-control" id="inputLastName"
+                                            aria-describedby="inputLastNameHelp" placeholder="Last Name" required>
+                                        <label for="inputLastName">Last Name</label>
+                                        <div class="invalid-feedback">
+                                            This field cannot be blank
+                                        </div>
+                                        <small id="inputLastNameHelp" class="form-text text-muted">
+                                            Only letters are allowed in this field.
+                                        </small>
+                                    </div>
+
+                                    <div class="form-floating col-md-8 has-validation">
+                                        <input type="email" class="form-control" id="inputEmail"
+                                            aria-describedby="inputEmailHelp" placeholder="Email" required>
+                                        <label for="inputEmail">Email</label>
+                                        <div class="invalid-feedback">
+                                            Please type a valid email.
+                                        </div>
+                                    </div>
+
+                                    <div class="form-floating col-md-4 has-validation">
+                                        <input type="date" class="form-control" id="inputBirthDate"
+                                            aria-describedby="inputBirthDateHelp" placeholder="Birth Date" required>
+                                        <label for="inputBirthDate">Birth Date</label>
+                                        <div class="invalid-feedback">
+                                            Please type a valid Birth Date.
+                                        </div>
+                                    </div>
+
+                                    <input type="hidden" id="inputLanguage" value="en-US" />
+
+                                    <div class="form-floating col-md-12 has-validation">
+                                        <input type="password" class="form-control" id="inputPassword"
+                                            aria-describedby="inputPasswordHelp" placeholder="Password" required>
+                                        <label for="inputPassword">Password</label>
+                                        <div class="invalid-feedback">
+                                            Please type a new password.
+                                        </div>
+                                        <small id="inputPasswordHelp" class="form-text text-muted">
+                                            Your new password must be minimum 8 characters and maximum 30
+                                            characters, have at least one letter and one number.
+                                        </small>
+                                    </div>
+
+                                    <div class="form-floating col-md-12 has-validation">
+                                        <input type="password" class="form-control" id="inputConfirmPassword"
+                                            placeholder="Confirm Password" required>
+                                        <label for="inputConfirmPassword">Confirm Password</label>
+                                        <div class="invalid-feedback">
+                                            Please retype your new password
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="" id="invalidCheck"
+                                                required>
+                                            <label class="form-check-label" for="invalidCheck">
+                                                I agree to the <a href="/terms_and_conditions">terms and conditions</a>
+                                                and
+                                                <a href="/privacy_policy">privacy policy</a> of the Reh@Store
+                                            </label>
+                                            <div class="invalid-feedback">
+                                                You must agree before creating an account.
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="" id="invalidCheck"
+                                                required>
+                                            <label class="form-check-label" for="invalidCheck">
+                                                I have 18 or more years old
+                                            </label>
+                                            <div class="invalid-feedback">
+                                                If you are under 18, you are not authorized to use the Reh@Store.
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-5">
+                                        <button class="btn btn-primary" type="submit">Create Account</button>
+                                    </div>
+
+                                    <div class="col-1" style="display: none;" id="loading_Symbol">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="sr-only">Loading...</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-6"></div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="modal fade" id="registrationModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+            aria-labelledby="registrationModal" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="staticBackdropLabel">Registration status</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <h5 id="registrationTitle"></h5>
+                        <p id="registrationMessage"></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src="/js/register.js"></script>
+
+</body>
+
+</html>

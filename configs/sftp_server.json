@@ -1,0 +1,6 @@
+{
+    "port": 8444,
+    "certificates": {
+        "privateKey": "privkey.pem"
+    }
+}

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <%- include('../partials/partial_header') %>
+
+        <%- include('../dependencies/bootstrap') %>
+            <%- include('../dependencies/react') %>
+
+                <link rel="stylesheet" href="/css/publisher/index.css">
+
+                <script src="/dependencies/js/ponyfill.min.js"></script>
+                <script src="/dependencies/js/StreamSaver.min.js"></script>
+</head>
+
+<body>
+    <div id="root">
+
+    </div>
+
+    <!-- Import Page Scripts -->
+    <script src="/js/api/custom_print.js"></script>
+    <script src="/js/api/account.js"></script>
+    <script src="/js/api/software.js"></script>
+    <script src="/js/publisher/index.jsx" type="text/babel"></script>
+</body>
+
+</html>

@@ -1,0 +1,146 @@
+const fs = require('fs-extra');
+const path = require('path');
+var crypto = require('crypto');
+var AdmZip = require('adm-zip');
+
+
+const models_folder = path.join(__dirname, '..', 'models');
+const modules_folder = path.join(__dirname, '..', 'modules');
+
+//#region Modules
+const { print, printError } = require(path.join(modules_folder, 'custom_print'));
+//#endregion
+
+//#region Models
+const config_manager = require(path.join(models_folder, 'config_manager'));
+const account_manager = require(path.join(models_folder, 'accounts'));
+const software_manager = require(path.join(models_folder, 'software_manager'));
+//#endregion
+
+//#region Folders
+const storage_folder_path = path.join(__dirname, '..', 'storage_system');
+const software_folder_path = path.join(storage_folder_path, 'software');
+const data_folder_path = path.join(storage_folder_path, 'software_data');
+const statistics_folder_path = path.join(storage_folder_path, 'software_statistics');
+const tmp_folder_path = path.join(storage_folder_path, 'tmp');
+//#endregion
+
+
+const data_cloud = {
+    getFileHash: async (filePath, hashAlgorithm = "sha512") => {
+        return new Promise(async (resolve, reject) => {
+            const dataPath = path.normalize(filePath);
+
+            let hash = crypto.createHash(hashAlgorithm);
+            let fileStream = fs.createReadStream(dataPath);
+
+            fileStream.on('open', () => { });
+
+            fileStream.on('error', (error) => {
+                printError("getFileHash", error);
+                reject(error);
+                return;
+            });
+
+            fileStream.on('data', (chunk) => {
+                hash.update(chunk);
+            });
+
+            fileStream.on('end', () => {
+                resolve(hash.digest('hex') + "|" + (+new Date(fs.statSync(filePath).mtime)));
+                return;
+            });
+
+        });
+    },
+
+    getFileHashTree: async (folderPath) => {
+        return new Promise(async (resolve, reject) => {
+            let jsonMerkleTree = {};
+
+            for (const file of fs.readdirSync(path.normalize(folderPath))) {
+                const targetPath = path.normalize(path.join(folderPath, file));
+                if (fs.statSync(targetPath).isFile()) {
+                    jsonMerkleTree[file] = await data_cloud.getFileHash(targetPath);
+                }
+                if (fs.statSync(targetPath).isDirectory()) {
+                    jsonMerkleTree[file] = await data_cloud.getFileHashTree(targetPath);
+                }
+            }
+
+            resolve(jsonMerkleTree);
+            return;
+        });
+    },
+
+    getJSONDifferences: (json1 = {}, json2 = {}) => {
+        let json1diff = JSON.parse(JSON.stringify(json1)),
+            json2diff = JSON.parse(JSON.stringify(json2));
+
+        let json1Keys = Object.keys(json1diff);
+
+        for (let i = 0; i < json1Keys.length; i++) {
+            let currentKey = json1Keys[i];
+            if (json1diff[currentKey] === json2diff[currentKey]) {
+                delete json1diff[currentKey];
+                delete json2diff[currentKey];
+            } else if (
+                (typeof json1diff[currentKey]) === "string" &&
+                (typeof json2diff[currentKey]) === "string" &&
+                json1diff[currentKey].split("|")[0] === json2diff[currentKey].split("|")[0]
+            ) {
+                delete json1diff[currentKey];
+                delete json2diff[currentKey];
+            } else if (JSON.stringify(json1diff[currentKey]) === JSON.stringify(json2diff[currentKey])) {
+                delete json1diff[currentKey];
+                delete json2diff[currentKey];
+            } else if ((typeof json1diff[currentKey]) === "object" && (typeof json2diff[currentKey]) === "object") {
+                let diff = getDiferences.json(json1diff[currentKey], json2diff[currentKey]);
+                if (diff[0] === diff[1]) {
+                    delete json1diff[currentKey];
+                    delete json2diff[currentKey];
+                } else if (Object.keys(diff[0]).length === 0 && Object.keys(diff[1]).length === 0) {
+                    delete json1diff[currentKey];
+                    delete json2diff[currentKey];
+                } else {
+                    json1diff[currentKey] = diff[0];
+                    json2diff[currentKey] = diff[1];
+                }
+            }
+        }
+
+        return [json1diff, json2diff];
+    },
+
+    getAppSlotName: async (
+        package_id = "",
+        branch = "",
+        major = "",
+        minor = "",
+        patch = "",
+        platform = "",
+        architecture = "",
+        os_version = ""
+    ) => {
+        console.log(package_id, branch, major, minor, patch, platform, architecture, os_version);
+        return new Promise(async (resolve, reject) => {
+            try {
+                let filename = await software_manager.files.getFileName(
+                    package_id, branch, major, minor, patch, platform, architecture, os_version
+                );
+                var fileReader = new AdmZip(path.normalize(path.join(software_folder_path, filename)));
+
+
+                resolve(JSON.parse(fileReader.readAsText("app_data.json")).slot_name);
+                return;
+            } catch (err) {
+                printError("Data Cloud Model", err);
+                reject("Unknown Error");
+                return;
+            }
+        })
+    }
+    //getSlotDirectory: (package_id = "", branch = "", version = "", )
+}
+
+module.exports = data_cloud;

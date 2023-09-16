@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= siteName %>
+    </title>
+
+    <%- include('../dependencies/bootstrap') %>
+</head>
+
+<body>
+    <%- include('../partials/navbar') %>
+
+        <style>
+            header {
+                padding: 156px 0 100px;
+            }
+
+            section {
+                padding: 150px 0;
+            }
+
+            .bg-primary {
+                background-color: #1abc9c !important;
+            }
+        </style>
+
+        <header class="bg-primary text-white" id="home">
+            <div class="container text-center">
+                <h1>Your account is confirmed.</h1>
+                <h3>You can now use the Reh@Store!</h3>
+                <p class="lead"><a href="/">Go back</a></p>
+            </div>
+        </header>
+
+
+        <section id="contact">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-8 mx-auto">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+</body>
+
+</html>

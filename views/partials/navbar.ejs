@@ -1,0 +1,249 @@
+<style>
+  html {
+    scroll-behavior: smooth;
+  }
+
+  .navbar {
+    background-color: #283044;
+  }
+
+  .navbar .navbar-brand {
+    color: #ffffff;
+  }
+
+  .navbar .navbar-brand:hover,
+  .navbar .navbar-brand:focus {
+    color: #8ea4d2;
+  }
+
+  .navbar .navbar-text {
+    color: #ffffff;
+  }
+
+  .navbar .navbar-text a {
+    color: #8ea4d2;
+  }
+
+  .navbar .navbar-text a:hover,
+  .navbar .navbar-text a:focus {
+    color: #8ea4d2;
+  }
+
+  .navbar .navbar-nav .nav-link {
+    color: #ffffff;
+    border-radius: .25rem;
+    margin: 0 0.25em;
+  }
+
+  .navbar .navbar-nav .nav-link:not(.disabled):hover,
+  .navbar .navbar-nav .nav-link:not(.disabled):focus {
+    color: #8ea4d2;
+  }
+
+  .navbar .navbar-nav .nav-item.active .nav-link,
+  .navbar .navbar-nav .nav-item.active .nav-link:hover,
+  .navbar .navbar-nav .nav-item.active .nav-link:focus,
+  .navbar .navbar-nav .nav-item.show .nav-link,
+  .navbar .navbar-nav .nav-item.show .nav-link:hover,
+  .navbar .navbar-nav .nav-item.show .nav-link:focus {
+    color: #8ea4d2;
+    background-color: #3c4867;
+  }
+
+  .navbar .navbar-toggler {
+    border-color: #3c4867;
+  }
+
+  .navbar .navbar-toggler:hover,
+  .navbar .navbar-toggler:focus {
+    background-color: #3c4867;
+  }
+
+  .navbar .navbar-toggler .navbar-toggler-icon {
+    color: #ffffff;
+  }
+
+  .navbar .navbar-collapse,
+  .navbar .navbar-form {
+    border-color: #ffffff;
+  }
+
+  .navbar .navbar-link {
+    color: #ffffff;
+  }
+
+  .navbar .navbar-link:hover {
+    color: #8ea4d2;
+  }
+
+  @media (max-width: 575px) {
+    .navbar-expand-sm .navbar-nav .show .dropdown-menu .dropdown-item {
+      color: #ffffff;
+    }
+
+    .navbar-expand-sm .navbar-nav .show .dropdown-menu .dropdown-item:hover,
+    .navbar-expand-sm .navbar-nav .show .dropdown-menu .dropdown-item:focus {
+      color: #8ea4d2;
+    }
+
+    .navbar-expand-sm .navbar-nav .show .dropdown-menu .dropdown-item.active {
+      color: #8ea4d2;
+      background-color: #3c4867;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .navbar-expand-md .navbar-nav .show .dropdown-menu .dropdown-item {
+      color: #ffffff;
+    }
+
+    .navbar-expand-md .navbar-nav .show .dropdown-menu .dropdown-item:hover,
+    .navbar-expand-md .navbar-nav .show .dropdown-menu .dropdown-item:focus {
+      color: #8ea4d2;
+    }
+
+    .navbar-expand-md .navbar-nav .show .dropdown-menu .dropdown-item.active {
+      color: #8ea4d2;
+      background-color: #3c4867;
+    }
+  }
+
+  @media (max-width: 991px) {
+    .navbar-expand-lg .navbar-nav .show .dropdown-menu .dropdown-item {
+      color: #ffffff;
+    }
+
+    .navbar-expand-lg .navbar-nav .show .dropdown-menu .dropdown-item:hover,
+    .navbar-expand-lg .navbar-nav .show .dropdown-menu .dropdown-item:focus {
+      color: #8ea4d2;
+    }
+
+    .navbar-expand-lg .navbar-nav .show .dropdown-menu .dropdown-item.active {
+      color: #8ea4d2;
+      background-color: #3c4867;
+    }
+  }
+
+  @media (max-width: 1199px) {
+    .navbar-expand-xl .navbar-nav .show .dropdown-menu .dropdown-item {
+      color: #ffffff;
+    }
+
+    .navbar-expand-xl .navbar-nav .show .dropdown-menu .dropdown-item:hover,
+    .navbar-expand-xl .navbar-nav .show .dropdown-menu .dropdown-item:focus {
+      color: #8ea4d2;
+    }
+
+    .navbar-expand-xl .navbar-nav .show .dropdown-menu .dropdown-item.active {
+      color: #8ea4d2;
+      background-color: #3c4867;
+    }
+  }
+
+  .navbar-expand .navbar-nav .show .dropdown-menu .dropdown-item {
+    color: #ffffff;
+  }
+
+  .navbar-expand .navbar-nav .show .dropdown-menu .dropdown-item:hover,
+  .navbar-expand .navbar-nav .show .dropdown-menu .dropdown-item:focus {
+    color: #8ea4d2;
+  }
+
+  .navbar-expand .navbar-nav .show .dropdown-menu .dropdown-item.active {
+    color: #8ea4d2;
+    background-color: #3c4867;
+  }
+
+  #cookiesMainDiv {
+    display: none;
+    position: absolute;
+    top: 0%;
+    left: 0%;
+    bottom: 0%;
+    right: 0%;
+    background: white;
+    z-index: 10000;
+  }
+
+  .cookies {
+    width: 350px;
+    flex-direction: column;
+    min-width: 0;
+    word-wrap: break-word;
+    background-color: #fff;
+    background-clip: border-box;
+    border: 1px solid #d2d2dc;
+    border-radius: 6px;
+    -webkit-box-shadow: 0px 0px 5px 0px rgb(249, 249, 250);
+    -moz-box-shadow: 0px 0px 5px 0px rgba(212, 182, 212, 1);
+    box-shadow: 0px 0px 5px 0px rgb(161, 163, 164)
+  }
+
+  .cookies a {
+    text-decoration: none;
+    color: #000;
+    margin-top: 8px
+  }
+
+  .cookies a:hover {
+    text-decoration: none;
+    color: blue;
+    margin-top: 8px
+  }
+</style>
+
+<div id="cookiesMainDiv">
+  <div class="d-flex justify-content-center mt-5 h-100 fixed-top">
+    <div class="d-flex align-items-center align-self-center card p-3 text-center cookies">
+      <i class="fas fa-cookie-bite" width="50"></i>
+      <span class="mt-2">
+        We use third party cookies to personalize content, ads and analyze site traffic.
+      </span>
+      <a class="d-flex align-items-center" href="/privacy_policy">
+        Learn more<i class="fa fa-angle-right ml-2"></i>
+      </a>
+      <button class="btn btn-dark mt-3 px-4" type="button" id="cookies_agree_button">I Agree</button>
+    </div>
+  </div>
+</div>
+<script type="text/javascript" src="/js/cookies_permissions.js"></script>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top" id="mainNav">
+  <div class="container">
+    <%if (mainPage) { %>
+      <a class="navbar-brand js-scroll-trigger" href="#">
+        <span style="color: rgb(249, 142, 27);">Reh</span><span style="color: white;">@Store</span>
+      </a>
+      <% }else{ %>
+        <a class="navbar-brand js-scroll-trigger" href="/">
+          <span style="color: rgb(249, 142, 27);">Reh</span><span style="color: white;">@Store</span>
+        </a>
+        <% } %>
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive"
+            aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarResponsive">
+            <ul class="navbar-nav ml-auto">
+
+              <%if (mainPage) { %>
+                <li class="nav-item">
+                  <a class="nav-link js-scroll-trigger" href="#downloads">Downloads</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link js-scroll-trigger" href="#contact">Contacts</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link js-scroll-trigger" href="#about">About</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link js-scroll-trigger" href="/api/account/register">Create account</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link js-scroll-trigger" href="/publisher">Open publisher pannel</a>
+                </li>
+                <% } %>
+            </ul>
+          </div>
+  </div>
+</nav>

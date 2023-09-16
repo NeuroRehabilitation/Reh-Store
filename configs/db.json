@@ -1,0 +1,10 @@
+{
+    "host": "localhost",
+    "user": "db_user",
+    "password": "db_password",
+    "database": "db_name",
+    "connectionLimit": 1000,
+    "connectTimeout": 3600000,
+    "waitForConnections": true,
+    "queueLimit": 20
+}
