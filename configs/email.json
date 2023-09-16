@@ -1,0 +1,9 @@
+{
+    "host": "host_url",
+    "port": "host_port",
+    "useSSL": true,
+    "useTLS": false,
+    "user": "email_address",
+    "password": "email_password",
+    "email": "email_address"
+}

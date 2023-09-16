@@ -1,0 +1,982 @@
+const fs = require('fs-extra');
+const path = require('path');
+var express = require('express');
+var validator = require('validator');
+var resolvePath = require('resolve-path');
+
+
+const models_folder = path.join(__dirname, '..', 'models');
+const modules_folder = path.join(__dirname, '..', 'modules');
+
+//#region Modules
+const { print, printError } = require(path.join(modules_folder, 'custom_print'));
+//#endregion
+
+//#region Models
+const config_manager = require(path.join(models_folder, 'config_manager'));
+const account_manager = require(path.join(models_folder, 'accounts'));
+const software_manager = require(path.join(models_folder, 'software_manager'));
+const data_cloud = require(path.join(models_folder, 'data_cloud'));
+//#endregion
+
+//#region Folders
+const storage_folder_path = path.join(__dirname, '..', 'storage_system');
+const data_folder_path = path.join(storage_folder_path, 'software_data');
+const statistics_folder_path = path.join(storage_folder_path, 'software_statistics');
+const tmp_folder_path = path.join(storage_folder_path, 'tmp');
+//#endregion
+
+
+var mainRouter = express.Router();
+//Check if the user is logged in, and has permissions to use the api
+mainRouter.use((req, res, next) => {
+    let ip = req.headers['cf-connecting-ip'] || req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    ip = ip.replace(/^.*:/, '');
+
+    let token = req.fields.token || "";
+
+    const username = req.session_manager.access_token.valid(token);
+    if (username === false) {
+        printError("Data Cloud API", `${+new Date()} [${ip}] - Invalid request to ${req.url} (invalid auth token)`);
+        res.header(401).json({
+            result: false,
+            reason: "Invalid Token"
+        });
+        return;
+    }
+
+    req.username = username;
+    req.token = token;
+
+    const permission_name = `data_cloud_${req.url.substring(1).replaceAll("/", "_")}`;
+    console.log("Requested permission " + permission_name);
+    (account_manager.permissions.users.hasPermission(username, permission_name)).then(
+        //On Sucess
+        (userHasPermission) => {
+            if (!userHasPermission) {
+                res.header(200).json({
+                    result: false,
+                    reason: 'Operation not allowed'
+                });
+                return;
+            }
+            print("Data Cloud API", `${+new Date()} [${ip}] - Request to ${req.url}`);
+
+            next();
+        },
+        //On Failed
+        (reason) => {
+            printError("Data Cloud API", reason);
+            res.header(200).json({
+                result: false,
+                reason: reason
+            });
+            return;
+
+        }
+    );
+});
+//Check if the user sent all the required fields
+mainRouter.use(async (req, res, next) => {
+    req.machine_id = req.fields.machine_id || "";
+    req.package_id = req.fields.package_id || "";
+    req.version = req.fields.version || "";
+    req.branch = req.fields.branch || "";
+    req.architecture = req.fields.architecture || "";
+    req.platform = req.fields.platform || "";
+    req.os_version = req.fields.os_version || "";
+
+    //#region Check for empty fields
+    if (req.machine_id === "") {
+        res.set("error", "Invalid Machine ID");
+        res.header(401).json({
+            result: false,
+            reason: "Invalid Machine ID"
+        });
+        return;
+    }
+    if (req.package_id === "") {
+        res.set("error", "Invalid Package ID");
+        res.header(401).json({
+            result: false,
+            reason: "Invalid Package ID"
+        });
+        return;
+    }
+    if (req.version === "") {
+        res.set("error", "Invalid Version");
+        res.header(401).json({
+            result: false,
+            reason: "Invalid Version"
+        });
+        return;
+    }
+    if (req.branch === "") {
+        res.set("error", "Invalid Branch");
+        res.header(401).json({
+            result: false,
+            reason: "Invalid Branch"
+        });
+        return;
+    }
+    if (req.architecture === "") {
+        res.set("error", "Invalid Architecture");
+        res.header(401).json({
+            result: false,
+            reason: "Invalid Architecture"
+        });
+        return;
+    }
+    if (req.platform === "") {
+        res.set("error", "Invalid Platform");
+        res.header(401).json({
+            result: false,
+            reason: "Invalid Platform"
+        });
+        return;
+    }
+    if (req.os_version === "") {
+        res.set("error", "Invalid OS Version");
+        res.header(401).json({
+            result: false,
+            reason: "Invalid OS Version"
+        });
+        return;
+    }
+    //#endregion
+
+
+    try {
+        //#region Purify Machine ID
+        if (!validator.isHash(req.machine_id, 'sha256')) {
+            res.set("error", "Invalid Machine ID");
+            res.header(401).json({
+                result: false,
+                reason: "Invalid Machine ID"
+            });
+            return;
+        }
+        //#endregion
+
+        //#region Purify package ID
+        if (!(await software_manager.software.packageExists(req.package_id))) {
+            res.set("error", 'Invalid package id (does not exist)');
+            res.header(200).json({
+                result: false,
+                reason: 'Invalid package id (does not exist)'
+            });
+            return;
+        }
+        //#endregion
+
+        //#region Purify Branch
+        if (!(await software_manager.branch.exists(req.package_id, req.branch))) {
+            res.set("error", 'Invalid branch name (does not exist)');
+            res.header(200).json({
+                result: false,
+                reason: 'Invalid branch name (does not exist)'
+            });
+            return;
+        }
+
+        const branches_allowed_to_access = await software_manager.branch.access.isAllowed(req.package_id, req.branch, req.username);
+        const clients_allowed_to_access = await software_manager.branch.access.allAllowed(req.package_id, req.branch);
+        if (clients_allowed_to_access.length > 0 && !branches_allowed_to_access) {
+            res.set("error", 'You are not allowed to access this branch');
+            res.header(200).json({
+                result: false,
+                reason: 'You are not allowed to access this branch'
+            });
+            return;
+        }
+        //#endregion
+
+        //#region Purify Version
+        if (req.version.replace(/(\d+)\.(\d+)\.(\d+)/, '') !== '') {
+            res.set("error", 'Invalid version');
+            res.header(200).json({
+                result: false,
+                reason: 'Invalid version'
+            });
+            return;
+        }
+
+        if (!(await software_manager.version.exists(
+            req.package_id, req.branch,
+            req.version.split(".")[0],
+            req.version.split(".")[1],
+            req.version.split(".")[2]
+        ))) {
+            res.set("error", 'Version does not exist for that branch of that package');
+            res.header(200).json({
+                result: false,
+                reason: 'Version does not exist for that branch of that package'
+            });
+            return;
+        }
+        //#endregion
+
+        //#region Purify Platform, Architecture and OS Version
+        const platform_exist_test = await software_manager.supportedPlatforms.getName(req.architecture, req.platform, req.os_version);
+        if (platform_exist_test === undefined || platform_exist_test === false) {
+            res.set("error", 'Platform does not exist in this store');
+            res.header(404).json({
+                result: false,
+                reason: 'Platform does not exist in this store'
+            });
+            return;
+        }
+
+        if (!(await software_manager.version.supportedPlatforms.exists(
+            req.package_id, req.branch,
+            req.version.split(".")[0],
+            req.version.split(".")[1],
+            req.version.split(".")[2],
+            req.architecture, req.platform, req.os_version
+        ))) {
+            res.set("error", 'Received platform is not compatible with that version');
+            res.header(404).json({
+                result: false,
+                reason: 'Received platform is not compatible with that version'
+            });
+            return;
+        }
+        //#endregion
+
+        //#region Get Slot name
+        try {
+            req.slot_name = await data_cloud.getAppSlotName(
+                req.package_id,
+                req.branch,
+                req.version.split(".")[0],
+                req.version.split(".")[1],
+                req.version.split(".")[2],
+                req.platform,
+                req.architecture,
+                req.os_version
+            );
+        } catch (err) {
+            printError("Data Cloud API", "Slot name not found");
+            req.slot_name = undefined;
+        }
+        //#endregion
+    } catch (err) {
+        res.set("error", err);
+        res.header(200).json({
+            result: false,
+            reason: err
+        });
+        return;
+    }
+
+    next();
+});
+
+//#region Common Routers Backup
+/*
+const commonRoutes = {
+    download: async (req = {}, res = {}, baseDir = "") => {
+        req.filePath = req.fields.filePath || "";
+
+        console.log(req.filePath);
+
+        if (req.filePath === "") {
+            res.set("error", "Invalid file path");
+            res.header(200).json({
+                result: false,
+                reason: "Invalid file path"
+            });
+            return;
+        }
+
+        if (!path.isAbsolute(baseDir)) {
+            printError("Data Cloud", "Function commonRoutes.getHash received baseDir that is not absolute");
+            res.set("error", "Unknown Error");
+            res.header(200).json({
+                result: false,
+                reason: "Unknown Error"
+            });
+            return;
+
+        }
+
+        if (req.slot_name === undefined) {
+            printError("Data Cloud", "Could not find the desired slot name");
+            res.set("error", "Unknown Error");
+            res.header(200).json({
+                result: false,
+                reason: "Unknown Error"
+            });
+            return;
+        }
+
+        let targetPath = path.normalize(baseDir);
+        targetPath = path.join(targetPath, req.package_id, req.slot_name, req.username, req.machine_id);
+        fs.ensureDirSync(targetPath);
+
+        var fullpath = undefined;
+
+        try {
+            console.log("Received path: " + req.filePath);
+            fullpath = path.normalize(resolvePath(targetPath, req.filePath.replaceAll("\\", "/").replace("/", "")));
+        } catch (err) {
+            printError("Data Cloud", "Stopped malicious path request");
+            res.set("error", "Invalid file path");
+            res.header(200).json({
+                result: false,
+                reason: "Invalid file path"
+            });
+            return;
+        }
+
+        if (!fs.existsSync(fullpath)) {
+            printError("Data Cloud", "Stopped malicious path request");
+            res.set("error", "File not found");
+            res.header(404).json({
+                result: false,
+                reason: "File not found"
+            });
+            return;
+        }
+        if (!fs.statSync(fullpath).isFile()) {
+            printError("Data Cloud", "Stopped malicious path request");
+            res.set("error", "File not found");
+            res.header(404).json({
+                result: false,
+                reason: "File not found"
+            });
+            return;
+        }
+
+        console.log("Path: " + fullpath);
+        res.header(200).sendFile(fullpath);
+    },
+    upload: async (req = {}, res = {}, baseDir = "") => {
+
+        const uploaded_file_path = path.normalize(path.join(req.files.file.path));
+        console.log(uploaded_file_path);
+
+        req.filePath = req.fields.filePath || "";
+
+        if (req.filePath === "") {
+            res.set("error", "Invalid file path");
+            fs.removeSync(uploaded_file_path);
+            res.header(200).json({
+                result: false,
+                reason: "Invalid file path"
+            });
+            return;
+        }
+
+        if (!path.isAbsolute(baseDir)) {
+            printError("Data Cloud", "Function commonRoutes.getHash received baseDir that is not absolute");
+            res.set("error", "Unknown Error");
+            fs.removeSync(uploaded_file_path);
+            res.header(200).json({
+                result: false,
+                reason: "Unknown Error"
+            });
+            return;
+
+        }
+
+        if (req.slot_name === undefined) {
+            printError("Data Cloud", "Could not find the desired slot name");
+            res.set("error", "Unknown Error");
+            fs.removeSync(uploaded_file_path);
+            res.header(200).json({
+                result: false,
+                reason: "Unknown Error"
+            });
+            return;
+        }
+
+        let targetPath = path.normalize(baseDir);
+        targetPath = path.join(targetPath, req.package_id, req.slot_name, req.username, req.machine_id);
+        fs.ensureDirSync(targetPath);
+
+        var fullpath = undefined;
+
+        try {
+            fullpath = resolvePath(targetPath, req.filePath.replace("/", ""));
+        } catch (err) {
+            printError("Data Cloud", "Stopped malicious path request");
+            res.set("error", "Invalid file path");
+            fs.removeSync(uploaded_file_path);
+            res.header(200).json({
+                result: false,
+                reason: "Invalid file path"
+            });
+            return;
+        }
+
+        fs.moveSync(uploaded_file_path, fullpath, { overwrite: true });
+
+        res.header(200).json({
+            result: true
+        });
+    },
+    createFolder: async (req = {}, res = {}, baseDir = "") => {
+        req.folderPath = req.fields.folderPath || "";
+
+        if (req.folderPath === "") {
+            res.set("error", "Invalid folder path");
+            res.header(200).json({
+                result: false,
+                reason: "Invalid folder path"
+            });
+            return;
+        }
+
+        if (!path.isAbsolute(baseDir)) {
+            printError("Data Cloud", "Function commonRoutes.getHash received baseDir that is not absolute");
+            res.set("error", "Unknown Error");
+            res.header(200).json({
+                result: false,
+                reason: "Unknown Error"
+            });
+            return;
+
+        }
+
+        if (req.slot_name === undefined) {
+            printError("Data Cloud", "Could not find the desired slot name");
+            res.set("error", "Unknown Error");
+            res.header(200).json({
+                result: false,
+                reason: "Unknown Error"
+            });
+            return;
+        }
+
+        let targetPath = path.normalize(baseDir);
+        targetPath = path.join(targetPath, req.package_id, req.slot_name, req.username, req.machine_id);
+        fs.ensureDirSync(targetPath);
+
+        var fullpath = undefined;
+
+        try {
+            fullpath = resolvePath(targetPath, req.folderPath.replace("/", ""));
+        } catch (err) {
+            printError("Data Cloud", "Stopped malicious path request");
+            res.set("error", "Invalid folder path");
+            res.header(200).json({
+                result: false,
+                reason: "Invalid folder path"
+            });
+            return;
+        }
+
+        fs.ensureDirSync(fullpath);
+
+        res.header(200).json({
+            result: true
+        });
+    },
+    remove: async (req = {}, res = {}, baseDir = "") => {
+        req.filePath = req.fields.filePath || "";
+
+        if (req.filePath === "") {
+            res.set("error", "Invalid file path");
+            res.header(200).json({
+                result: false,
+                reason: "Invalid file path"
+            });
+            return;
+        }
+
+        if (!path.isAbsolute(baseDir)) {
+            printError("Data Cloud", "Function commonRoutes.getHash received baseDir that is not absolute");
+            res.set("error", "Unknown Error");
+            res.header(200).json({
+                result: false,
+                reason: "Unknown Error"
+            });
+            return;
+
+        }
+
+        if (req.slot_name === undefined) {
+            printError("Data Cloud", "Could not find the desired slot name");
+            res.set("error", "Unknown Error");
+            res.header(200).json({
+                result: false,
+                reason: "Unknown Error"
+            });
+            return;
+        }
+
+        let targetPath = path.normalize(baseDir);
+        targetPath = path.join(targetPath, req.package_id, req.slot_name, req.username, req.machine_id);
+        fs.ensureDirSync(targetPath);
+
+        var fullpath = undefined;
+
+        try {
+            fullpath = resolvePath(targetPath, req.filePath.replace("/", ""));
+        } catch (err) {
+            printError("Data Cloud", "Stopped malicious path request");
+            res.set("error", "Invalid file path");
+            res.header(200).json({
+                result: false,
+                reason: "Invalid file path"
+            });
+            return;
+        }
+
+        fs.removeSync(fullpath);
+
+        res.header(200).json({
+            result: true
+        });
+    },
+    getHash: async (req = {}, res = {}, baseDir = "") => {
+        if (!path.isAbsolute(baseDir)) {
+            printError("Data Cloud", "Function commonRoutes.getHash received baseDir that is not absolute");
+            res.set("error", "Unknown Error");
+            res.header(200).json({
+                result: false,
+                reason: "Unknown Error"
+            });
+            return;
+
+        }
+
+        if (req.slot_name === undefined) {
+            printError("Data Cloud", "Could not find the desired slot name");
+            res.set("error", "Unknown Error");
+            res.header(200).json({
+                result: false,
+                reason: "Unknown Error"
+            });
+            return;
+        }
+
+        let targetPath = path.normalize(baseDir);
+        targetPath = path.join(targetPath, req.package_id, req.slot_name, req.username, req.machine_id);
+        fs.ensureDirSync(targetPath);
+
+
+
+        try {
+            let tree = await data_cloud.getFileHashTree(targetPath);
+
+            res.header(200).json({
+                result: true,
+                data: tree
+            });
+            return;
+
+        } catch (err) {
+            printError("Data Cloud", err);
+            res.set("error", err);
+            res.header(200).json({
+                result: false,
+                reason: err
+            });
+            return;
+
+        }
+    }
+}
+*/
+//#endregion
+
+
+const commonRoutes = {
+    download: async (req = {}, res = {}, baseDir = "") => {
+        req.filePath = req.fields.filePath || "";
+
+        console.log(req.filePath);
+
+        if (req.filePath === "") {
+            res.set("error", "Invalid file path");
+            res.header(200).json({
+                result: false,
+                reason: "Invalid file path"
+            });
+            return;
+        }
+
+        if (!path.isAbsolute(baseDir)) {
+            printError("Data Cloud", "Function commonRoutes.getHash received baseDir that is not absolute");
+            res.set("error", "Unknown Error");
+            res.header(200).json({
+                result: false,
+                reason: "Unknown Error"
+            });
+            return;
+
+        }
+
+        if (req.slot_name === undefined) {
+            printError("Data Cloud", "Could not find the desired slot name");
+            res.set("error", "Unknown Error");
+            res.header(200).json({
+                result: false,
+                reason: "Unknown Error"
+            });
+            return;
+        }
+
+        let targetPath = path.normalize(baseDir);
+        targetPath = path.join(targetPath, req.package_id, req.slot_name, req.username, req.machine_id);
+        fs.ensureDirSync(targetPath);
+
+        var fullpath = undefined;
+
+        try {
+            if (!validator.isBase64(req.filePath.replaceAll("/", "").replaceAll("\\", ""), { urlSafe: true })) {
+                printError("Data Cloud", "Received path is encoded in an incorrect way");
+                res.set("error", "All files and folders names must be encoded has base64");
+                res.header(200).json({
+                    result: false,
+                    reason: "All files and folders names must be encoded has base64"
+                });
+                return;
+            }
+            fullpath = path.normalize(resolvePath(targetPath, req.filePath.replaceAll("\\", "/").replace("/", "")));
+        } catch (err) {
+            printError("Data Cloud", "Stopped malicious path request");
+            res.set("error", "Invalid file path");
+            res.header(200).json({
+                result: false,
+                reason: "Invalid file path"
+            });
+            return;
+        }
+
+        console.log("The Path: ", fullpath);
+
+        if (!fs.existsSync(fullpath)) {
+            printError("Data Cloud", "Stopped malicious path request");
+            res.set("error", "File not found");
+            res.header(404).json({
+                result: false,
+                reason: "File not found"
+            });
+            return;
+        }
+        if (!fs.statSync(fullpath).isFile()) {
+            printError("Data Cloud", "Stopped malicious path request");
+            res.set("error", "File not found");
+            res.header(404).json({
+                result: false,
+                reason: "File not found"
+            });
+            return;
+        }
+
+        console.log("Path: " + fullpath);
+        res.header(200).sendFile(fullpath);
+    },
+    upload: async (req = {}, res = {}, baseDir = "") => {
+
+        const uploaded_file_path = path.normalize(path.join(req.files.file.path));
+        console.log(uploaded_file_path);
+
+        req.filePath = req.fields.filePath || "";
+
+        if (req.filePath === "") {
+            res.set("error", "Invalid file path");
+            fs.removeSync(uploaded_file_path);
+            res.header(200).json({
+                result: false,
+                reason: "Invalid file path"
+            });
+            return;
+        }
+
+        if (!path.isAbsolute(baseDir)) {
+            printError("Data Cloud", "Function commonRoutes.getHash received baseDir that is not absolute");
+            res.set("error", "Unknown Error");
+            fs.removeSync(uploaded_file_path);
+            res.header(200).json({
+                result: false,
+                reason: "Unknown Error"
+            });
+            return;
+
+        }
+
+        if (req.slot_name === undefined) {
+            printError("Data Cloud", "Could not find the desired slot name");
+            res.set("error", "Unknown Error");
+            fs.removeSync(uploaded_file_path);
+            res.header(200).json({
+                result: false,
+                reason: "Unknown Error"
+            });
+            return;
+        }
+
+        let targetPath = path.normalize(baseDir);
+        targetPath = path.join(targetPath, req.package_id, req.slot_name, req.username, req.machine_id);
+        fs.ensureDirSync(targetPath);
+
+        var fullpath = undefined;
+
+        try {
+            if (!validator.isBase64(req.filePath.replaceAll("/", "").replaceAll("\\", ""), { urlSafe: true })) {
+                printError("Data Cloud", "Received path is encoded in an incorrect way");
+                res.set("error", "All files and folders names must be encoded has base64");
+                res.header(200).json({
+                    result: false,
+                    reason: "All files and folders names must be encoded has base64"
+                });
+                return;
+            }
+            fullpath = path.normalize(resolvePath(targetPath, req.filePath.replaceAll("\\", "/").replace("/", "")));
+        } catch (err) {
+            printError("Data Cloud", "Stopped malicious path request");
+            res.set("error", "Invalid file path");
+            fs.removeSync(uploaded_file_path);
+            res.header(200).json({
+                result: false,
+                reason: "Invalid file path"
+            });
+            return;
+        }
+
+        fs.moveSync(uploaded_file_path, fullpath, { overwrite: true });
+
+        res.header(200).json({
+            result: true
+        });
+    },
+    createFolder: async (req = {}, res = {}, baseDir = "") => {
+        req.folderPath = req.fields.folderPath || "";
+
+        if (req.folderPath === "") {
+            res.set("error", "Invalid folder path");
+            res.header(200).json({
+                result: false,
+                reason: "Invalid folder path"
+            });
+            return;
+        }
+
+        if (!path.isAbsolute(baseDir)) {
+            printError("Data Cloud", "Function commonRoutes.getHash received baseDir that is not absolute");
+            res.set("error", "Unknown Error");
+            res.header(200).json({
+                result: false,
+                reason: "Unknown Error"
+            });
+            return;
+
+        }
+
+        if (req.slot_name === undefined) {
+            printError("Data Cloud", "Could not find the desired slot name");
+            res.set("error", "Unknown Error");
+            res.header(200).json({
+                result: false,
+                reason: "Unknown Error"
+            });
+            return;
+        }
+
+        let targetPath = path.normalize(baseDir);
+        targetPath = path.join(targetPath, req.package_id, req.slot_name, req.username, req.machine_id);
+        fs.ensureDirSync(targetPath);
+
+        var fullpath = undefined;
+
+        try {
+            console.log(req.folderPath.replaceAll("/", "").replaceAll("\\", ""));
+            if (!validator.isBase64(req.folderPath.replaceAll("/", "").replaceAll("\\", ""), { urlSafe: true })) {
+                printError("Data Cloud", "Received path is encoded in an incorrect way");
+                res.set("error", "All files and folders names must be encoded has base64");
+                res.header(200).json({
+                    result: false,
+                    reason: "All files and folders names must be encoded has base64"
+                });
+                return;
+            }
+            fullpath = path.normalize(resolvePath(targetPath, req.folderPath.replaceAll("\\", "/").replace("/", "")));
+        } catch (err) {
+            printError("Data Cloud", "Stopped malicious path request");
+            res.set("error", "Invalid folder path");
+            res.header(200).json({
+                result: false,
+                reason: "Invalid folder path"
+            });
+            return;
+        }
+
+        fs.ensureDirSync(fullpath);
+
+        res.header(200).json({
+            result: true
+        });
+    },
+    remove: async (req = {}, res = {}, baseDir = "") => {
+        req.filePath = req.fields.filePath || "";
+
+        if (req.filePath === "") {
+            res.set("error", "Invalid file path");
+            res.header(200).json({
+                result: false,
+                reason: "Invalid file path"
+            });
+            return;
+        }
+
+        if (!path.isAbsolute(baseDir)) {
+            printError("Data Cloud", "Function commonRoutes.getHash received baseDir that is not absolute");
+            res.set("error", "Unknown Error");
+            res.header(200).json({
+                result: false,
+                reason: "Unknown Error"
+            });
+            return;
+
+        }
+
+        if (req.slot_name === undefined) {
+            printError("Data Cloud", "Could not find the desired slot name");
+            res.set("error", "Unknown Error");
+            res.header(200).json({
+                result: false,
+                reason: "Unknown Error"
+            });
+            return;
+        }
+
+        let targetPath = path.normalize(baseDir);
+        targetPath = path.join(targetPath, req.package_id, req.slot_name, req.username, req.machine_id);
+        fs.ensureDirSync(targetPath);
+
+        var fullpath = undefined;
+
+        try {
+            if (!validator.isBase64(req.filePath.replaceAll("/", "").replaceAll("\\", ""), { urlSafe: true })) {
+                printError("Data Cloud", "Received path is encoded in an incorrect way");
+                res.set("error", "All files and folders names must be encoded has base64");
+                res.header(200).json({
+                    result: false,
+                    reason: "All files and folders names must be encoded has base64"
+                });
+                return;
+            }
+            fullpath = path.normalize(resolvePath(targetPath, req.filePath.replaceAll("\\", "/").replace("/", "")));
+        } catch (err) {
+            printError("Data Cloud", "Stopped malicious path request");
+            res.set("error", "Invalid file path");
+            res.header(200).json({
+                result: false,
+                reason: "Invalid file path"
+            });
+            return;
+        }
+
+        fs.removeSync(fullpath);
+
+        res.header(200).json({
+            result: true
+        });
+    },
+    getHash: async (req = {}, res = {}, baseDir = "") => {
+        if (!path.isAbsolute(baseDir)) {
+            printError("Data Cloud", "Function commonRoutes.getHash received baseDir that is not absolute");
+            res.set("error", "Unknown Error");
+            res.header(200).json({
+                result: false,
+                reason: "Unknown Error"
+            });
+            return;
+
+        }
+
+        if (req.slot_name === undefined) {
+            printError("Data Cloud", "Could not find the desired slot name");
+            res.set("error", "Unknown Error");
+            res.header(200).json({
+                result: false,
+                reason: "Unknown Error"
+            });
+            return;
+        }
+
+        let targetPath = path.normalize(baseDir);
+        targetPath = path.join(targetPath, req.package_id, req.slot_name, req.username, req.machine_id);
+        fs.ensureDirSync(targetPath);
+
+
+
+        try {
+            let tree = await data_cloud.getFileHashTree(targetPath);
+
+            res.header(200).json({
+                result: true,
+                data: tree
+            });
+            return;
+
+        } catch (err) {
+            printError("Data Cloud", err);
+            res.set("error", err);
+            res.header(200).json({
+                result: false,
+                reason: err
+            });
+            return;
+
+        }
+    }
+}
+
+//#region Data Backup Router
+let dataRouter = express.Router();
+
+dataRouter.post('/download', (req, res) => {
+    commonRoutes.download(req, res, data_folder_path);
+});
+
+dataRouter.post('/upload', (req, res) => {
+    commonRoutes.upload(req, res, data_folder_path);
+});
+
+dataRouter.post('/delete', (req, res) => {
+    commonRoutes.remove(req, res, data_folder_path);
+});
+
+dataRouter.post('/create', (req, res) => {
+    commonRoutes.createFolder(req, res, data_folder_path);
+});
+
+dataRouter.post('/getHash', (req, res) => {
+    commonRoutes.getHash(req, res, data_folder_path);
+});
+
+mainRouter.use('/software_data', dataRouter);
+//#endregion
+
+//#region Statistics Backup Router
+let statisticsRouter = express.Router();
+
+statisticsRouter.post('/getHash', (req, res) => {
+    commonRoutes.getHash(req, res, statistics_folder_path);
+});
+
+statisticsRouter.post('/download', (req, res) => {
+    commonRoutes.download(req, res, statistics_folder_path, req.filePath);
+});
+
+statisticsRouter.post('/delete', (req, res) => {
+    commonRoutes.remove(req, res, statistics_folder_path);
+});
+
+statisticsRouter.post('/create', (req, res) => {
+    commonRoutes.createFolder(req, res, statistics_folder_path);
+});
+
+statisticsRouter.post('/upload', (req, res) => {
+    commonRoutes.upload(req, res, statistics_folder_path, req.filePath);
+});
+
+mainRouter.use('/statistics', statisticsRouter);
+//#endregion
+
+module.exports = mainRouter;

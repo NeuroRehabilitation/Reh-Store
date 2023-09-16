@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <%- include('partials/partial_header') %>
+
+        <%- include('dependencies/bootstrap') %>
+</head>
+
+<body>
+    <%- include('partials/navbar') %>
+
+        <style>
+            header {
+                padding: 156px 0 100px;
+            }
+
+            section {
+                padding: 150px 0;
+            }
+
+            .bg-primary {
+                background-color: #1abc9c !important;
+            }
+
+            #support_chat_button {
+                position: fixed;
+                bottom: 10px;
+                right: 15px;
+                /*height: 60%;
+                width: 30%;*/
+            }
+
+            #support_chat {
+                position: fixed;
+                bottom: 5px;
+                right: 15px;
+
+                height: 70%;
+                width: 30%;
+
+                display: none;
+            }
+
+            #support_chat_close {
+                cursor: pointer;
+            }
+
+            #support_chat_spinner {
+                position: relative;
+                top: 50%;
+                left: 50%;
+                color: white;
+            }
+        </style>
+
+        <header class="bg-primary text-white" id="home">
+            <div class="container text-center">
+                <h1>Reh@Store</h1>
+                <p class="lead">The distribution service for research projects</p>
+            </div>
+        </header>
+
+        <section id="about">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-8 mx-auto">
+                        <h2>About</h2>
+                        <p class="lead">
+                            The Reh@Store is a software distribution service for research projects maintained by the
+                            <a href="https://neurorehabilitation.m-iti.org/lab/">NeuroRehabLab</a>.
+                            It was developed by <a href="https://pt.linkedin.com/in/zlynt">Ivan Teixeira</a> for his
+                            master's degree in Informatics Engineering.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="downloads" class="bg-light">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-8 mx-auto">
+                        <h2>Downloads</h2>
+                        <p class="lead">Version 5 Alpha (latest unstable):</p>
+                        <ul>
+                            <li>Windows 10 (x32/x64): <a
+                                    href="/app_update/version_5/win32-x64/rehstore-setup-latest.exe">Download</a>
+                            </li>
+                        </ul>
+                        <ul>
+                            <li>Windows 7 (x32/x64): <a
+                                    href="/app_update/version_5/win32-x64/rehstore-setup-latest.exe">Download</a>
+                            </li>
+                        </ul>
+                        <p class="lead">Version 4 (latest stable):</p>
+                        <ul>
+                            <li>Windows 10 (x32/x64): <a
+                                    href="/app_update/win32-x64/rehstore-setup-latest.exe">Download</a>
+                            </li>
+                        </ul>
+                        <ul>
+                            <li>Windows 7 (x32/x64): <a
+                                    href="/app_update/win32-x64/rehstore-setup-latest.exe">Download</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <section id="contact">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-8 mx-auto">
+                        <div class="card">
+                            <div class="card-body">
+                                <h2 class="card-title">Contact us</h2>
+                            </div>
+                            <div class="card-body">
+                                <div class="card" style="width: 18rem;">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Email</h5>
+                                        <p class="card-text">
+                                            <a href="mailto:<%= support_email %>">
+                                                <%= support_email %>
+                                            </a>
+                                        </p>
+                                    </div>
+                                </div>
+                                <!--
+                                <div class="input-group mb-3">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="basic-addon1">Email</span>
+                                    </div>
+                                    <input type="text" class="form-control" placeholder="" aria-label="Email"
+                                        aria-describedby="basic-addon1">
+                                </div>
+                                <div class="input-group mb-3">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="basic-addon1">Subject</span>
+                                    </div>
+                                    <input type="text" class="form-control" placeholder="" aria-label="Subject"
+                                        aria-describedby="basic-addon1">
+                                </div>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Message</span>
+                                    </div>
+                                    <textarea class="form-control" aria-label="Message"></textarea>
+                                </div>
+                                <br>
+                                <button type="button" class="btn btn-primary" style="margin-left: 5px; margin-bottom: 5px;">Send</button>                                
+-->
+                            </div>
+
+
+                        </div>
+                        <p></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="py-5 bg-dark">
+            <div class="container">
+                <p class="m-0 text-center text-white">Copyright &copy; <a href="https://zlynt.github.io/">Ivan
+                        Teixeira</a> 2020; Theme by <a href="https://startbootstrap.com/">Start Bootstrap LLC</a></p>
+            </div>
+            <!-- /.container -->
+        </footer>
+
+        <button type="button" class="btn btn-primary" id="support_chat_button"><i
+                class="fas fa-comment-dots"></i></button>
+
+        <div id="support_chat"
+            style="background-color: rgba(231, 236, 239, 0.8); border-radius: 5px; border-top-left-radius: 15px; ">
+            <i class="fas fa-times-circle" id="support_chat_close"></i>
+            <div id="support_chat_spinner" style="font-size: 3rem;">
+                <i class="fas fa-circle-notch fa-spin"></i>
+            </div>
+            <!-- Production chat -->
+            <iframe data-src="https://tawk.to/chat/60f1bf3d649e0a0a5ccc9159/1fao5621r" src="about:blank"
+                id="support_chat_iframe" style="width: 100%; height: 90%; display:none;" frameBorder="0"
+                onload="document.getElementById('support_chat_spinner').style.display='none';"></iframe>
+        </div>
+        <script>
+            let support_chat = document.getElementById('support_chat');
+            let support_chat_open_button = document.getElementById('support_chat_button');
+            let support_chat_close = document.getElementById('support_chat_close');
+
+            if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                support_chat.style.width = '90%'
+            }
+
+            support_chat_open_button.addEventListener('click', () => {
+                support_chat.style.display = "block";
+                support_chat_open_button.style.display = "none";
+            })
+            support_chat_close.addEventListener('click', () => {
+                support_chat_open_button.style.display = "block";
+                support_chat.style.display = "none";
+            })
+
+
+        </script>
+</body>
+
+</html>
