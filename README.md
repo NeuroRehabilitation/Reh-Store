@@ -1,11 +1,17 @@
-# Reh@Store server
+<p align="center">
 
-The Reh@Store is a software distribution service for research projects maintained by the [NeuroRehabLab](https://neurorehabilitation.m-iti.org/lab/). It was developed by [Ivan Teixeira](https://pt.linkedin.com/in/zlynt) for his master's degree in Informatics Engineering.
+<img style="float: right;" width="100px" src="https://raw.githubusercontent.com/Zlynt/Reh-Store/master/docs/images/logo_rehstore.svg">
+<h1 align="center">Reh@Store</h1>
+
+***<p align="center">An Open-Source Framework for Enhancing ICT-Based Health Interventions with Distribution, Maintenance, and Data Collection</p>***
+<p/>
 
 
-## How to setup
+## How to setup the server
 
-First install the latest LTS Node.js version
+First install the latest LTS Node.js version and then MariaDB
+
+Insert the database schema into MariaDB and configure the server with the desired settings.
 
 Then create a systemd service to run the Reh@Store 24/7. This service must execute the script "start.sh" located in the root of this directory.
 
@@ -22,11 +28,3 @@ Server logs are located inside the folder "logs" in the root of this directory
 ## Package storage
 
 The uploaded installers are located inside the "software_storage" folder in the root of this directory. Inside of this folder, there are 3 folders. The "tmp" is where the files are being sent while the upload process is being done. After the upload is completed, they are renamed and sent to the folder "software".
-
-## Admin account
-
-Default username: admin
-
-Default password: admin123
-
-Please change this credentials as fast as possible after the Reh@Store is online. If possible, create a new account with all priviledges and delete this account.
