@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reh@Store</title>
+
+    <!-- Import jQuery -->
+    <script>window.$ = window.jQuery = require('jquery');</script>
+
+    <link rel="stylesheet" href="../dependencies/css/font-awesome.5.15.1.css">
+
+    <!-- Google Fonts -->
+    <link rel="stylesheet" href="../dependencies/css/GoogleFonts.css">
+
+    <!-- Page Design -->
+    <link rel="stylesheet" href="css/topbar.css">
+
+    <script src="../dependencies/js/electron_dependencies.js"></script>
+    <script src="../dependencies/js/window_manager.js"></script>
+    <script src="./js/event_manager.js"></script>
+
+</head>
+
+<body>
+    <div class="topBar">
+        <p class="title">
+            <span class="span1">Reh</span><span class="span2">@Store</span>
+            </span>
+        </p>
+        <ul class="buttons">
+            <li class="fas fa-minus" id="topbar_minimize"></li>
+            <li class="far fa-square" id="topbar_maximize"></li>
+            <li class="fas fa-times close" id="topbar_close"></li>
+        </ul>
+    </div>
+    <iframe src="" class="container" frameBorder="0" id="pdf_reader"></iframe>
+
+    <script src="js/index.js"></script>
+
+</body>
+
+</html>

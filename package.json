@@ -1,0 +1,96 @@
+{
+    "name": "rehstore",
+    "productName": "Reh@Store",
+    "appId": "com.zlynt.rehstore",
+    "copyright": "Copyright © 2020 Ivan Teixeira",
+    "version": "5.9.6",
+    "description": "NeuroRehabLab Project Distribution System",
+    "main": "app.js",
+    "scripts": {
+        "start:prod": "electron .",
+        "start:dev": "npx nodemon --watch * --exec \"npx electron .\"",
+        "make:win": "npx electron-rebuild && electron-builder build --ia32 --x64",
+        "make:linux": "electron-builder build --linux",
+        "make:mac": "electron-builder build --mac",
+        "build:test": "./dist/win-unpacked/Reh@Store.exe",
+        "packages:rebuild": "npx electron-rebuild"
+    },
+    "repository": "https://github.com/Zlynt/RehStore-Client-App",
+    "author": "Ivan Teixeira <thezlynt@gmail.com>",
+    "license": "MIT",
+    "build": {
+        "directories": {
+            "buildResources": "build",
+            "output": "dist"
+        },
+        "win": {
+            "target": "nsis",
+            "icon": "icon.png",
+            "legalTrademarks": "Ivan Teixeira and NeuroRehabLab"
+        },
+        "linux": {
+            "icon": "icon.png",
+            "target": [
+                "deb"
+            ],
+            "category": "Utility"
+        },
+        "dmg": {
+            "sign": false
+        },
+        "mac": {
+            "category": "productivity",
+            "target": {
+                "target": "dmg",
+                "arch": [
+                    "arm64"
+                ]
+            }
+        },
+        "nsis": {
+            "oneClick": false,
+            "perMachine": false,
+            "allowToChangeInstallationDirectory": true,
+            "installerIcon": "icon.ico",
+            "uninstallerIcon": "icon.ico",
+            "installerHeaderIcon": "icon.ico",
+            "multiLanguageInstaller": true,
+            "runAfterFinish": true,
+            "createDesktopShortcut": true,
+            "createStartMenuShortcut": true
+        }
+    },
+    "dependencies": {
+        "@electron/remote": "2.0.1",
+        "@pdftron/webviewer": "8.1.0",
+        "@types/bluebird": "3.0.36",
+        "@types/minimatch": "3.0.3",
+        "@types/node": "9.4.1",
+        "@types/ssh2": "0.5.33",
+        "@types/ssh2-streams": "0.1.2",
+        "adm-zip": "0.5.9",
+        "archiver": "5.3.0",
+        "axios": "^1.2.1",
+        "bluebird": "3.4.6",
+        "chalk": "2.3.0",
+        "electron-is-dev": "2.0.0",
+        "electron-updater": "4.3.8",
+        "form-data": "^4.0.0",
+        "fs-extra": "10.0.0",
+        "hus-console": "^2.0.0",
+        "jquery": "3.6.0",
+        "minimatch": "3.0.3",
+        "node-fetch": "^3.3.0",
+        "node-machine-id": "1.1.12",
+        "react": "17.0.2",
+        "react-dom": "17.0.2",
+        "sftp-sync-deploy": "0.7.1",
+        "ssh2": "0.5.4"
+    },
+    "devDependencies": {
+        "electron": "12.2.2",
+        "electron-builder": "23.1.0",
+        "electron-rebuild": "3.2.9",
+        "nodemon": "^2.0.15"
+    }
+}

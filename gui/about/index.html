@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reh@Store</title>
+
+    <style>
+        body {
+            position: absolute;
+
+            top: 0%;
+            bottom: 0%;
+            left: 0%;
+            right: 0%;
+
+            width: 100%;
+            height: 100%;
+
+            margin: 0px;
+            padding: 0px;
+
+            -webkit-app-region: drag;
+        }
+
+        .container {
+            position: absolute;
+
+            top: 0%;
+            bottom: 0%;
+            left: 0%;
+            right: 0%;
+
+            width: 100%;
+            height: 100%;
+
+            margin: 0px;
+            padding: 0px;
+            border-radius: 10px;
+
+            color: #8EA4D2;
+            background-color: #445174;
+
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: calc(5.5vh + 5.5vw);
+        }
+
+        @keyframes loadingAnimation {
+            0% {
+                color: #8EA4D2;
+            }
+
+            50% {
+                color: #283044;
+            }
+
+            100% {
+                color: #8EA4D2;
+            }
+        }
+
+        #message {
+            margin: 0px;
+            padding: 0px;
+            white-space: nowrap;
+
+
+            position: absolute;
+
+            top: 50%;
+            left: 50%;
+
+
+            -webkit-transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%);
+        }
+
+        #submessage {
+            margin: 0px;
+            padding: 0px;
+            white-space: nowrap;
+
+
+            position: absolute;
+
+            top: 60%;
+            left: 50%;
+            font-size: calc(3vh + 3vw);
+
+
+
+            animation-name: loadingAnimation;
+            animation-duration: 1.5s;
+            animation-iteration-count: infinite;
+
+
+            -webkit-transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%);
+        }
+
+        #closeBtn {
+            border: none;
+            border-radius: 10px;
+            width: 100px;
+            height: 30px;
+            font-weight: bold;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 20px;
+            color: #283044;
+            background-color: #F98E1B;
+            -webkit-app-region: no-drag;
+
+            position: absolute;
+            bottom: 5%;
+
+            left: 50%;
+            text-align: center;
+            -webkit-transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%);
+        }
+
+        #closeBtn:hover {
+            transition-duration: 0.2s;
+            cursor: pointer;
+            color: #F98E1B;
+            background-color: #3C4867;
+        }
+    </style>
+
+
+    <script src="../dependencies/js/electron_dependencies.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <div id="message">
+            <span style="color: rgb(249, 142, 27);">Reh</span><span style="color: white;">@Store</span>
+        </div>
+        <div id="submessage"></div>
+        <button id="closeBtn" onclick="close_window()">Close</button>
+    </div>
+
+    <script>
+
+        var appVersion = app.getVersion();
+        document.getElementById('submessage').innerHTML = 'V' + appVersion;
+
+
+        const close_window = () => {
+            ipcRenderer.send('window-manager-close-channel', "about");
+        }
+    </script>
+</body>
+
+</html>

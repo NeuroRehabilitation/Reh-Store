@@ -1,0 +1,4 @@
+{
+    "watch": ["app.js", "gui/"],
+    "ext": "js, jsx, css, html"
+  }
