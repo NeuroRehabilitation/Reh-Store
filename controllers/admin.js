@@ -53,7 +53,7 @@ const webserver_config = config_manager.get('webserver.json');
 
 router.get('/', function (req, res) {
     res.setHeader("Content-Security-Policy",
-        "default-src 'self' data: gap: https://rehstore.zlynt.tk https://fonts.gstatic.com 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:;").
+        "default-src 'self' data: gap: https://rehstore.arditi.pt https://fonts.gstatic.com 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:;").
         header(200).render('admin_pannel/index', { siteName: 'Reh@Store', mainPage: true });
 });
 
