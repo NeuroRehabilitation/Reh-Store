@@ -37,8 +37,7 @@ function SectionDownload() {
                 method.
               </p>
               <p className="description">
-                Our Reh@Store email is{" "}
-                <a href="#">tickets@rehstore-remote-support.p.tawk.email</a>
+                Email: <a href="#">tickets@rehstore-remote-support.p.tawk.email</a>
               </p>
             </Col>
             <Col className="text-center" lg="8" md="12">

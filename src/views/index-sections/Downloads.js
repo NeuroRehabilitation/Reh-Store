@@ -86,7 +86,7 @@ function SectionNucleoIcons() {
                     Download for Windows 7, 8
                   </Button>
                 </h6>
-                <h1></h1>
+                {/** <h1></h1>
                 <h5>
                   <i className="fa-brands fa-apple" /> Macbook
                 </h5>
@@ -101,6 +101,7 @@ function SectionNucleoIcons() {
                   <i className="fa-brands fa-android" /> Android
                 </h5>
                 <h6>Not Compatible</h6>
+                  **/}
 
                 {/* Comentado até acabar de implementar esta parte */}
                 {/**<Button

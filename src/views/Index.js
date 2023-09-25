@@ -27,6 +27,7 @@ import DemoFooter from "components/Footers/DemoFooter.js";
 
 // Index Sections
 import About from "views/index-sections/About.js";
+import WeAreOpenSource from "views/index-sections/WeAreOpenSource";
 import Downloads from "views/index-sections/Downloads.js";
 import Contact from "views/index-sections/Contact.js";
 import Sponsors from "views/example-index-sections/Sponsors";
@@ -46,6 +47,7 @@ function Index() {
       <div className="main" style={{ background: "#151F20" }}>
         <About />
         <Downloads />
+        <WeAreOpenSource />
         <Sponsors />
         <Contact />
         {/*<SectionButtons />
