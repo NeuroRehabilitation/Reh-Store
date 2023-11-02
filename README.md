@@ -28,7 +28,7 @@ Compile the modules for the electron
 If an error shows, you can alternatively compile the modules for the electron by running:
 > **./node_modules/.bin/electron-rebuild**
 
-Before compiling, go to the folder modules/internet_manager.js and modifify the "app_update_url" and the "default_domain". 
+Before compiling, go to the folder modules/internet_manager.js and modifify the "app_update_url" and the "default_domain" to point to your own domain. Also, modify all occurences of "rehstore.arditi.pt" to your own domain (Visual Studio Code can replace them all at once), in order for this client application to use your server.
 
 After the installation of the dependencies and configuration of the url's, compile the code by running:
 > **npm run make**
